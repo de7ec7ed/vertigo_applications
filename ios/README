@@ -1,0 +1,18 @@
+
+Update the Makefile with the correct code signing certificate
+Update the Makefile with the correct ip address of the iOS device
+
+Follow the directions below to create a codesign certificate in OSX
+	Open up Keychain Access in Applications > Utilities.
+	Go to Keychain Access > Certificate Assistant > Create a Certificate.
+	For Name‚ type: "Jailbroken Developer".
+	For Identity Type‚ leave it as ‚Self Signed Root.
+	For Certificate Type, choose‚ Code Signing.
+	Check the box for Let me override defaults.
+	Click on Continue, and in the popup box that comes up.
+	Type in any number under Serial Number.
+	Leave Validity Period (days) alone.
+	Click on Continue.
+	Fill in the details with whatever you want (not really necessary).
+	Click on Continue.
+	Click on Continue for the rest of the dialog boxes.

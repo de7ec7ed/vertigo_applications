@@ -1,0 +1,5 @@
+
+disable a particular core in linux
+echo 0 >> /sys/devices/system/cpu/cpu"N"/online
+example to disablel cpu1
+"echo 0 >> /sys/devices/system/cpu/cpu1/online"
