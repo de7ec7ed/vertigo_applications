@@ -1,4 +1,4 @@
-TARGET := ios_sysldr
+TARGET := ios_krnldr
 
 MKDIR := ../../../make
 BINDIR := ../../../binaries
@@ -7,7 +7,7 @@ LIBRARIESDIR := ../../../libraries
 SYSTEMDIR := ../../../system
 
 REMOTEUSER:= root
-REMOTEIP := 192.168.1.112
+REMOTEIP := 192.168.1.152
 REMOTEPATH := /
 
 include $(MKDIR)/Makefile.common
@@ -23,7 +23,7 @@ SRCFILES += gen.c tt.c
 
 include $(MKDIR)/Makefile_arm_ios.common
 
-CODESIGN_IDENTITY := "0xde7ec7ed"
+CODESIGN_IDENTITY := "de7ec7ed"
 
 all:
 	$(MAKE) -s clean
@@ -32,8 +32,8 @@ all:
 	$(MAKE) -s codesign
 
 copy:
-	cp $(LIBRARIESDIR)/armlib/src/vmsa/tt.c $(SRCDIR)/
-	cp $(LIBRARIESDIR)/armlib/src/vmsa/gen.c $(SRCDIR)/
+	cp $(LIBRARIESDIR)/armv7lib/src/vmsa/tt.c $(SRCDIR)/
+	cp $(LIBRARIESDIR)/armv7lib/src/vmsa/gen.c $(SRCDIR)/
 	
 build:
 	mkdir -p $(OBJDIR)

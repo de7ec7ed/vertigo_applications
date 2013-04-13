@@ -19,19 +19,10 @@
  * Written by Kirk Swidowski <kirk@swidowski.com>
  */
 
-#ifndef __MAIN_H__
-#define __MAIN_H__
+#ifndef __CONFIG_H__
+#define __CONFIG_H__
 
-#include <types.h>
-#include <armv7lib/vmsa/tt.h>
-#include <armv7lib/vmsa/gen.h>
-#include <hdrlib/mod.h>
+// make sure __DBG_GEN_H__ is not included
+#define __DBG_GEN_H__
 
-void usage(int argc, char *argv[]);
-result_t copy_module_header(size_t index, mod_header_t *hdr, size_t size);
-int main(int argc, char *argv[]);
-
-// Missing system ldr prototype
-extern result_t ldr_call_copy_module_header(size_t index, mod_header_t *hdr, size_t size);
-
-#endif //__MAIN_H__
+#endif //__CONFIG_H__

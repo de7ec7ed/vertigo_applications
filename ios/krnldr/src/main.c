@@ -41,13 +41,13 @@
 #include <kern.h>
 
 // Library Includes
-#include <armlib/cmsa/cac.h>
-#include <armlib/vmsa/tt.h>
-#include <armlib/vmsa/gen.h>
-#include <armlib/vmsa/tlb.h>
+#include <armv7lib/cmsa/cac.h>
+#include <armv7lib/vmsa/tt.h>
+#include <armv7lib/vmsa/gen.h>
+#include <armv7lib/vmsa/tlb.h>
 
 #include <hdrlib/gen.h>
-#include <hdrlib/sys.h>
+#include <hdrlib/krn.h>
 
 #define HEADER__MEMORY_REGION_TABLE_SIZE 8
 #define HEADER__MEMORY_REGION_DEFAULT_SIZE (4 * ONE_MEGABYTE)
@@ -215,6 +215,8 @@ result_t load_flat_binary(char *file, void **fb, size_t *size) {
 
 	CHECK_NOT_NULL(tmp, "[-] unable to malloc space for the tmp flat binary buffer\n");
 
+	memset(tmp, 0, FLAT_BINARY_FILE_MAX_SIZE);
+
 	// possible kernel memory leak but who cares
 	// the system would probably be better off if this doesn't get loaded and just causes a small memory leak.
 	CHECK_SUCCESS(kern_allocate(fb, FLAT_BINARY_FILE_MAX_SIZE, VM_FLAGS_ANYWHERE), "[-] unable to allocate space for the flat binary\n");
@@ -232,9 +234,9 @@ result_t load_flat_binary(char *file, void **fb, size_t *size) {
 
 	CHECK_SUCCESS(kern_protect(*fb, FLAT_BINARY_FILE_MAX_SIZE, TRUE, VM_PROT_ALL), "[-] unable to set the flat binary's memory as readable, writable and executable\n");
 
-	CHECK_SUCCESS(kern_protect(*fb, FLAT_BINARY_FILE_MAX_SIZE, FALSE, VM_PROT_DEFAULT), "[-] unable to set the flat binary's memory as readable, writable and executable\n");
+	CHECK_SUCCESS(kern_protect(*fb, FLAT_BINARY_FILE_MAX_SIZE, FALSE, VM_PROT_DEFAULT), "[-] unable to set the flat binary's memory as readable and writable\n");
 
-	CHECK_SUCCESS(kern_write(*fb, tmp, FLAT_BINARY_FILE_MAX_SIZE), "[-] unable to copy flat binary to kernel space\n");
+	CHECK_SUCCESS(kern_write(*fb, tmp, *size), "[-] unable to copy flat binary to kernel space\n");
 
 	CHECK_SUCCESS(kern_wire(*fb, FLAT_BINARY_FILE_MAX_SIZE, VM_PROT_DEFAULT), "[-] unable to wire the flat binary's memory\n");
 
@@ -247,13 +249,13 @@ result_t load_flat_binary(char *file, void **fb, size_t *size) {
 
 result_t patch_flat_binary_svc_mode(void *fb, size_t size) {
 
-	sys_header_t *hdr;
-	sys_import_header_t *imp_hdr;
+	krn_header_t *hdr;
+	krn_import_header_t *imp_hdr;
 	tt_virtual_address_t va;
 	tt_physical_address_t pa;
 
 	hdr = fb;
-	imp_hdr = (sys_import_header_t *)((size_t)(hdr->import) + (size_t)fb);
+	imp_hdr = (krn_import_header_t *)((size_t)(hdr->import) + (size_t)fb);
 
 	if(hdr->callsign != CALLSIGN) {
 		return FAILURE;
@@ -272,15 +274,15 @@ result_t patch_flat_binary_svc_mode(void *fb, size_t size) {
 
 result_t patch_flat_binary_usr_mode(void *fb, size_t size) {
 
-	sys_header_t *hdr;
-	sys_import_header_t *imp_hdr;
+	krn_header_t *hdr;
+	krn_import_header_t *imp_hdr;
 	size_t tmp;
 
 	hdr = fb;
 
 	CHECK_SUCCESS(kern_read(&(hdr->import), sizeof(imp_hdr), &imp_hdr, &tmp), "[-] unable to import header\n");
 
-	imp_hdr = (sys_import_header_t *)((size_t)hdr + (size_t)imp_hdr);
+	imp_hdr = (krn_import_header_t *)((size_t)hdr + (size_t)imp_hdr);
 
 	tmp = GEN_IMPORT_OPERATING_SYSTEM_IOS;
 	CHECK_SUCCESS(kern_write(&(imp_hdr->operating_system), &tmp, sizeof(tmp)), "[-] unable to  set operating_system\n");

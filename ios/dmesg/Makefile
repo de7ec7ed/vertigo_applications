@@ -1,4 +1,4 @@
-TARGET := ios_rmmod
+TARGET := ios_dmesg
 
 MKDIR := ../../../make
 BINDIR := ../../../binaries

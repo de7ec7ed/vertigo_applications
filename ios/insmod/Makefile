@@ -7,7 +7,7 @@ LIBRARIESDIR := ../../../libraries
 SYSTEMDIR := ../../../system
 
 REMOTEUSER:= root
-REMOTEIP := 192.168.1.103
+REMOTEIP := 192.168.1.152
 REMOTEPATH := /
 
 include $(MKDIR)/Makefile.common
@@ -21,7 +21,7 @@ SRCFILES := main.c main.S
 
 include $(MKDIR)/Makefile_arm_ios.common
 
-CODESIGN_IDENTITY := "0xde7ec7ed"
+CODESIGN_IDENTITY := "de7ec7ed"
 
 all:
 	$(MAKE) -s clean

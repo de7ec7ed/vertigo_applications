@@ -25,13 +25,15 @@
 #include <types.h>
 #include <armv7lib/vmsa/tt.h>
 #include <armv7lib/vmsa/gen.h>
-#include <hdrlib/mod.h>
 
 void usage(int argc, char *argv[]);
-result_t copy_module_header(size_t index, mod_header_t *hdr, size_t size);
+result_t log_call_init(void);
+size_t log_call_get_size(void);
+size_t log_call_get_value(void);
+result_t log_call_fini(void);
 int main(int argc, char *argv[]);
 
 // Missing system ldr prototype
-extern result_t ldr_call_copy_module_header(size_t index, mod_header_t *hdr, size_t size);
+extern result_t ldr_call_add_module(void *pointer, size_t size, size_t argc, u8_t *argv[]);
 
 #endif //__MAIN_H__
