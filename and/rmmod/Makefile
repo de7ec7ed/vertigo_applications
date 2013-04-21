@@ -14,7 +14,7 @@ HDRFILES := $(INCFILES) $(INCLUDESFILES)
 
 SRCFILES := main.c main.S
 
-include $(MKDIR)/Makefile_arm_lin.common
+include $(MKDIR)/Makefile_arm_and.common
 
 all:
 	$(MAKE) -s clean
