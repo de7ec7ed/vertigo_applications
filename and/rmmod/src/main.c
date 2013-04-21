@@ -51,10 +51,10 @@ result_t remove_module(u8_t *string, size_t argc, u8_t *argv[]) {
 
 int main(int argc, char *argv[]) {
 
-	printf("\t------------------------------\n");
+	printf("\t-------------------------------\n");
 	printf("\t-    v*v    de7ec7ed   v*v    -\n");
-	printf("\t-    *^* Android rmmod *^*    -\n");
-	printf("\t------------------------------\n");
+	printf("\t-    *^* android rmmod *^*    -\n");
+	printf("\t-------------------------------\n");
 
 	if(argc < 2) {
 		usage(argc, argv);

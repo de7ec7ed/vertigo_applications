@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
 
 	printf("\t------------------------------\n");
 	printf("\t-    v*v   de7ec7ed   v*v    -\n");
-	printf("\t-    *^* Chrome  lsmod *^*    -\n");
+	printf("\t-    *^* chrome  lsmod *^*   -\n");
 	printf("\t------------------------------\n");
 
 	hdr = malloc(size);

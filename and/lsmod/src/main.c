@@ -57,10 +57,10 @@ int main(int argc, char *argv[]) {
 	size_t size = 256;
 	size_t index = 0;
 
-	printf("\t------------------------------\n");
+	printf("\t-------------------------------\n");
 	printf("\t-    v*v    de7ec7ed   v*v    -\n");
-	printf("\t-    *^* Android lsmod *^*    -\n");
-	printf("\t------------------------------\n");
+	printf("\t-    *^* android lsmod *^*    -\n");
+	printf("\t-------------------------------\n");
 
 	hdr = malloc(size);
 

@@ -74,10 +74,10 @@ result_t add_module(char *file, size_t argc, u8_t *argv[]) {
 
 int main(int argc, char *argv[]) {
 
-	printf("\t------------------------------\n");
-	printf("\t-    v*v  0xde7ec7ed  v*v    -\n");
-	printf("\t-    *^* Linux insmod *^*    -\n");
-	printf("\t------------------------------\n");
+	printf("\t--------------------------------\n");
+	printf("\t-    v*v    de7ec7ed    v*v    -\n");
+	printf("\t-    *^* android insmod *^*    -\n");
+	printf("\t--------------------------------\n");
 
 	if(argc < 2) {
 		usage(argc, argv);

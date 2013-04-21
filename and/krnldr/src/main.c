@@ -59,10 +59,10 @@ static int __init main_init(void) {
   int size = 0;
   int result = 0;
 
-  printk(KERN_ALERT "\t------------------------------\n");
-  printk(KERN_ALERT "\t-    v*v   de7ec7ed  v*v    -\n");
-  printk(KERN_ALERT "\t-    *^* Linux krnldr *^*    -\n");
-  printk(KERN_ALERT "\t------------------------------\n");
+  printk(KERN_ALERT "\t--------------------------------\n");
+  printk(KERN_ALERT "\t-    v*v    de7ec7ed    v*v    -\n");
+  printk(KERN_ALERT "\t-    *^* android krnldr *^*    -\n");
+  printk(KERN_ALERT "\t--------------------------------\n");
 
   printk(KERN_ALERT "main_init start\n");
 
