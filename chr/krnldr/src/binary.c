@@ -134,70 +134,86 @@ result_t binary_neuter_xn(void *fb, size_t size) {
 
 	// set some limits on the range for the brute force
 	// pa to va translations. It is assumed that kernel
-	// memory is located above the 2GB line. So the low
-	// end is 2GB the high end is 3GB assuming that the
+	// memory is located above the 3GB line. So the low
+	// end is 3GB the high end is 4GB assuming that the
 	// kernel page tables are usually located just above
 	// the 2GB line. This limit can be increased to whatever
 	// but keep in mind it will take potentially longer to
 	// perform the translation.
 
-	start.all = 2 * (u32_t)ONE_GIGABYTE;
+	start.all = 3 * (u32_t)ONE_GIGABYTE;
 	end.all = (4 * (u32_t)ONE_GIGABYTE) - 1;
+
+	// the linux kernel uses ttbr1 for the base of the kernel
+	// page tables, would be great if they would just use ttbcr
+	// to leverage it as well. it would get rid of all this
+	// page table sync stuff.
 
 	ttbr0 = tt_get_ttbr0();
 	ttbr1 = tt_get_ttbr1();
 	ttbcr = tt_get_ttbcr();
 	tt_select_ttbr(va, ttbr0, ttbr1, ttbcr, &ttbr);
 
-	//ttbr = ttbr1;
 
 	//printk(KERN_ALERT "ttbcr:%08x\n", ttbcr.all);
 	//printk(KERN_ALERT "ttbr:%08x\n", ttbr.all);
 
 	tt_ttbr_to_pa(ttbr, &pa);
 
-	gen_pa_to_va(pa, start, end, &l1);
+	if(gen_pa_to_va(pa, start, end, &l1) == SUCCESS) {
 
-	while(va.all < ((u32_t)fb + size)) {
-		tt_get_fld(va, l1, &fld);
-		if(tt_fld_is_supersection(fld) == TRUE) {
-			fld.supersection.fields.xn = FALSE;
-			tt_set_fld(va, l1, fld);
-			tmp = TT_SUPERSECTION_SIZE;
-		}
-		else if(tt_fld_is_section(fld) == TRUE) {
-			fld.section.fields.xn = FALSE;
-			tt_set_fld(va, l1, fld);
-			tmp = TT_SECTION_SIZE;
-		}
-		else if(tt_fld_is_page_table(fld) == TRUE) {
-			//printk(KERN_ALERT "fld:%08x\n", fld.all);
-
-			tt_fld_to_pa(fld, &pa);
-			gen_pa_to_va(pa, start, end, &l2);
-
-			tt_get_sld(va, l2, &sld);
-
-			if(tt_sld_is_large_page(sld) == TRUE) {
-				sld.large_page.fields.xn = FALSE;
-				tmp = TT_LARGE_PAGE_SIZE;
+		while(va.all < ((u32_t)fb + size)) {
+			tt_get_fld(va, l1, &fld);
+			if(tt_fld_is_supersection(fld) == TRUE) {
+				fld.supersection.fields.xn = FALSE;
+				tt_set_fld(va, l1, fld);
+				tmp = TT_SUPERSECTION_SIZE;
+				printk(KERN_ALERT "fld is a supersection\n");
 			}
-			else if(tt_sld_is_small_page(sld) == TRUE) {
-				//printk(KERN_ALERT "sld:%08x\n", sld.all);
-				sld.small_page.fields.xn = FALSE;
-				tmp = TT_SMALL_PAGE_SIZE;
+			else if(tt_fld_is_section(fld) == TRUE) {
+				fld.section.fields.xn = FALSE;
+				tt_set_fld(va, l1, fld);
+				tmp = TT_SECTION_SIZE;
+				printk(KERN_ALERT "fld is a section\n");
+			}
+			else if(tt_fld_is_page_table(fld) == TRUE) {
+				printk(KERN_ALERT "fld:%08x\n", fld.all);
+
+				tt_fld_to_pa(fld, &pa);
+				if(gen_pa_to_va(pa, start, end, &l2) == SUCCESS) {
+
+					tt_get_sld(va, l2, &sld);
+
+					printk(KERN_ALERT "sld:%08x\n", sld.all);
+
+					if(tt_sld_is_large_page(sld) == TRUE) {
+						printk(KERN_ALERT "sld is a large page\n");
+						sld.large_page.fields.xn = FALSE;
+						tmp = TT_LARGE_PAGE_SIZE;
+					}
+					else if(tt_sld_is_small_page(sld) == TRUE) {
+						printk(KERN_ALERT "sld is a small page\n");
+						sld.small_page.fields.xn = FALSE;
+						tmp = TT_SMALL_PAGE_SIZE;
+					}
+					else {
+						return FAILURE;
+					}
+
+					tt_set_sld(va, l2, sld);
+				}
+				else {
+					printk(KERN_ALERT "unable to translate sld pa to va\n");
+					return FAILURE;
+				}
 			}
 			else {
+				printk(KERN_ALERT "unable to translate fld pa to va\n");
 				return FAILURE;
 			}
 
-			tt_set_sld(va, l2, sld);
+			va.all += tmp;
 		}
-		else {
-			return FAILURE;
-		}
-
-		va.all += tmp;
 	}
 
 	tlb_invalidate_entire_unified_tlb();
@@ -244,7 +260,7 @@ result_t binary_print(void *buffer, size_t size) {
 
   start.all = 2 * (u32_t)ONE_GIGABYTE;
   end.all = (4 * (u32_t)ONE_GIGABYTE) - 1;
-  pa.all = 0x16440000;
+  pa.all = 0x12C30000;
 
   gen_pa_to_va(pa, start, end, &va);
 

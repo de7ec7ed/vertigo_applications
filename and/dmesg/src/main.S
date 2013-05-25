@@ -22,18 +22,58 @@
 #include <defines.h>
 
 callsign: .word CALLSIGN
-ldr_call_identifier: .word 0x11111111
-add_module: .word 0  //LDR_ADD_MODULE
+log_call_identifier: .word 0x00000000
+
+log_init_function: .word 0
 
 .align 4
-.globl ldr_call_add_module
-ldr_call_add_module:
-	push {r1 - r6}
-	push {r0 - r3}
+.globl log_call_init
+log_call_init:
+	push {r1 - r2}
 	ldr r0, callsign
-	ldr r1, ldr_call_identifier
-	ldr r2, add_module
-	pop {r3 - r6}
+	ldr r1, log_call_identifier
+	ldr r2, log_init_function
 	mcr	p0, 0, r0, c0, c0, 0
-	pop {r1 - r6}
+	pop {r1 - r2}
+	mov pc, lr
+
+log_fini_function: .word 3
+
+.align 4
+.globl log_call_fini
+log_call_fini:
+	push {r1 - r2}
+	ldr r0, callsign
+	ldr r1, log_call_identifier
+	ldr r2, log_fini_function
+	mcr	p0, 0, r0, c0, c0, 0
+	pop {r1 - r2}
+	mov pc, lr
+
+log_get_value_function: .word 2
+
+.align 4
+.globl log_call_get_value
+log_call_get_value:
+	push {r1 - r2}
+	ldr r0, callsign
+	ldr r1, log_call_identifier
+	ldr r2, log_get_value_function
+	mcr	p0, 0, r0, c0, c0, 0
+	mov r0, r1
+	pop {r1 - r2}
+	mov pc, lr
+
+log_get_size_function: .word 1
+
+.align 4
+.globl log_call_get_size
+log_call_get_size:
+	push {r1 - r2}
+	ldr r0, callsign
+	ldr r1, log_call_identifier
+	ldr r2, log_get_size_function
+	mcr	p0, 0, r0, c0, c0, 0
+	mov r0, r1
+	pop {r1 - r2}
 	mov pc, lr

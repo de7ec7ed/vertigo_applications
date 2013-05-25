@@ -19,21 +19,10 @@
  * Written by Kirk Swidowski <kirk@swidowski.com>
  */
 
-#include <defines.h>
+#ifndef __CONFIG_H__
+#define __CONFIG_H__
 
-callsign: .word CALLSIGN
-ldr_call_identifier: .word 0x11111111
-add_module: .word 0  //LDR_ADD_MODULE
+// make sure __DBG_GEN_H__ is not included
+#define __DBG_GEN_H__
 
-.align 4
-.globl ldr_call_add_module
-ldr_call_add_module:
-	push {r1 - r6}
-	push {r0 - r3}
-	ldr r0, callsign
-	ldr r1, ldr_call_identifier
-	ldr r2, add_module
-	pop {r3 - r6}
-	mcr	p0, 0, r0, c0, c0, 0
-	pop {r1 - r6}
-	mov pc, lr
+#endif //__CONFIG_H__

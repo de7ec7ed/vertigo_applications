@@ -24,8 +24,9 @@
 #include <linux/kernel.h>   // Needed for KERN_ALERT
 #include <linux/fcntl.h>
 #include <linux/slab.h>     // Needed for kmalloc and krealloc
+#include <linux/mm.h>
 
-
+#include <asm/io.h>
 
 #include <linux/cpu.h>
 #include <linux/smp.h>
@@ -58,6 +59,7 @@ static int __init main_init(void) {
 
   int size = 0;
   int result = 0;
+  unsigned int *wdt;
 
   printk(KERN_ALERT "\t-------------------------------\n");
   printk(KERN_ALERT "\t-    v*v   de7ec7ed    v*v    -\n");
@@ -67,15 +69,11 @@ static int __init main_init(void) {
   printk(KERN_ALERT "main_init start\n");
 
   printk(KERN_ALERT "smp_processor_id: %08x\n", smp_processor_id());
+
   // take down all the CPUs other than CPU 0, this should effectively reschedule us
   // on CPU 0 if we started on another core.
   cpu_down(1);
-  printk(KERN_ALERT "cpu_present_bits: %08x", *(unsigned int *)cpu_present_mask);
-  // yeah yeah its a read only variable, not anymore!
-  *(unsigned int *)(cpu_present_mask) = 0x1;
-  printk(KERN_ALERT "cpu_possible_mask: %08x", *(unsigned int *)cpu_possible_mask);
-  // yeah yeah its a read only variable, not anymore!
-  *(unsigned int *)(cpu_possible_mask) = 0x1;
+
   printk(KERN_ALERT "smp_processor_id: %08x\n", smp_processor_id());
 
   if(file == NULL) {
@@ -86,16 +84,27 @@ static int __init main_init(void) {
 
   printk(KERN_ALERT "virtual to physical offset: %08x\n", (unsigned int)virt_to_phys(0));
 
+  //FIXME: WDT HACK
+  wdt = ioremap(0x101D0000, FOUR_KILOBYTES);
+  *wdt = 0;
+
   buffer = NULL;
   if((binary_load(file, (void **)&buffer, &size) == -1) || size == 0) {
     return -1;
   }
 
-  binary_neuter_xn(buffer, BINARY_DEFAULT_BUFFER_SIZE);
+  msleep(1);
+
+  if(binary_neuter_xn(buffer, BINARY_DEFAULT_BUFFER_SIZE) != SUCCESS) {
+	  binary_unload(buffer);
+	  return -1;
+  }
+
+  binary_neuter_xn((void *)0xF7030000, FOUR_KILOBYTES);
 
   sync_touch((unsigned int)buffer, BINARY_DEFAULT_BUFFER_SIZE);
 
-  sync_kernel_pages_in_all_processes();
+  sync_kernel_pages_in_all_processes((void *)VMALLOC_START, (VMALLOC_END - VMALLOC_START));
 
   binary_patch(buffer);
 

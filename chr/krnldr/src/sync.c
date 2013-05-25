@@ -77,6 +77,7 @@ int sync_kernel_page_table_entries(pgd_t *source, pgd_t *destination, unsigned l
 
 	unsigned int index;
 	pmd_t *pmd_s, *pmd_d;
+	pud_t *pud_s, *pud_d;
 
 	BUG_ON(source == NULL);
 	BUG_ON(destination == NULL);
@@ -100,8 +101,11 @@ int sync_kernel_page_table_entries(pgd_t *source, pgd_t *destination, unsigned l
 		set_pgd(destination, *source);
 	}
 
-	pmd_s = pmd_offset((pud_t *)source, address);
-	pmd_d = pmd_offset((pud_t *)destination, address);
+	pud_s = pud_offset(source, address);
+	pud_d = pud_offset(destination, address);
+
+	pmd_s = pmd_offset(pud_s, address);
+	pmd_d = pmd_offset(pud_d, address);
 
 	if(pmd_none(*pmd_s)) {
 		return 0;
@@ -120,18 +124,18 @@ int sync_kernel_page_table_entries(pgd_t *source, pgd_t *destination, unsigned l
   \param destination destination address space to sync to
   \retval 0 success
 */
-int sync_kernel_pages(struct mm_struct *source, struct mm_struct *destination) {
+int sync_kernel_pages(struct mm_struct *source, struct mm_struct *destination, void *address, int size) {
 	int status;
-	unsigned long address;
+	unsigned long tmp;
 	pgd_t *pgd_s = source->pgd;
 	pgd_t *pgd_d = destination->pgd;
 	BUG_ON(source == NULL);
 	BUG_ON(destination == NULL);
 	BUG_ON(destination == source);
 
-	for (address = VMALLOC_START; address < VMALLOC_END; address += PAGE_SIZE) {
-		BUG_ON((address & PAGE_MASK) != address);
-		status = sync_kernel_page_table_entries(pgd_s, pgd_d, address);
+	for (tmp = (unsigned long)address; tmp < ((unsigned long)address + size); tmp += PAGE_SIZE) {
+		BUG_ON((tmp & PAGE_MASK) != tmp);
+		status = sync_kernel_page_table_entries(pgd_s, pgd_d, tmp);
 		if (unlikely(status != 0)) {
 			return status;
 		}
@@ -142,11 +146,10 @@ int sync_kernel_pages(struct mm_struct *source, struct mm_struct *destination) {
 /*!
 \brief synchronizes kernel mappings to all address spaces
   Synchronizes kernel mappings from current address space to all other
-  address spaces belonging to other processes. This is equivalent to a
-  vmalloc_sync_all call in the kernel, if such is implemented.
+  address spaces belonging to other processes.
   \retval 0 success
 */
-int sync_kernel_pages_in_all_processes(void) {
+int sync_kernel_pages_in_all_processes(void *address, int size) {
 	int status;
 	struct task_struct *task;
 
@@ -161,9 +164,12 @@ int sync_kernel_pages_in_all_processes(void) {
 			continue;
 		}
 		task_lock(task);
-		BUG_ON(task->mm == NULL);
-		BUG_ON(task->mm == current->active_mm);
-		status = sync_kernel_pages(current->active_mm, task->mm);
+
+		if(task->mm != NULL) {
+			BUG_ON(task->mm == current->active_mm);
+			status = sync_kernel_pages(current->active_mm, task->mm, address, size);
+		}
+
 		task_unlock(task);
 		if (unlikely(status != 0)) {
 			break;
@@ -186,10 +192,9 @@ int sync_touch(unsigned long start, unsigned long end) {
 	address = start;
 
 	while(address < end) {
-		scratch = *(u32_t *)address;
+		scratch = *(volatile u32_t *)address;
 		address += PAGE_SIZE;
 	}
 
-	__asm__ __volatile__("" :: "m" (scratch));
 	return 0;
 }
