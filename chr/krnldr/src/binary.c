@@ -168,31 +168,31 @@ result_t binary_neuter_xn(void *fb, size_t size) {
 				fld.supersection.fields.xn = FALSE;
 				tt_set_fld(va, l1, fld);
 				tmp = TT_SUPERSECTION_SIZE;
-				printk(KERN_ALERT "fld is a supersection\n");
+				//printk(KERN_ALERT "fld is a supersection\n");
 			}
 			else if(tt_fld_is_section(fld) == TRUE) {
 				fld.section.fields.xn = FALSE;
 				tt_set_fld(va, l1, fld);
 				tmp = TT_SECTION_SIZE;
-				printk(KERN_ALERT "fld is a section\n");
+				//printk(KERN_ALERT "fld is a section\n");
 			}
 			else if(tt_fld_is_page_table(fld) == TRUE) {
-				printk(KERN_ALERT "fld:%08x\n", fld.all);
+				//printk(KERN_ALERT "fld:%08x\n", fld.all);
 
 				tt_fld_to_pa(fld, &pa);
 				if(gen_pa_to_va(pa, start, end, &l2) == SUCCESS) {
 
 					tt_get_sld(va, l2, &sld);
 
-					printk(KERN_ALERT "sld:%08x\n", sld.all);
+					//printk(KERN_ALERT "sld:%08x\n", sld.all);
 
 					if(tt_sld_is_large_page(sld) == TRUE) {
-						printk(KERN_ALERT "sld is a large page\n");
+						//printk(KERN_ALERT "sld is a large page\n");
 						sld.large_page.fields.xn = FALSE;
 						tmp = TT_LARGE_PAGE_SIZE;
 					}
 					else if(tt_sld_is_small_page(sld) == TRUE) {
-						printk(KERN_ALERT "sld is a small page\n");
+						//printk(KERN_ALERT "sld is a small page\n");
 						sld.small_page.fields.xn = FALSE;
 						tmp = TT_SMALL_PAGE_SIZE;
 					}

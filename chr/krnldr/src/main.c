@@ -32,6 +32,9 @@
 #include <linux/smp.h>
 #include <linux/delay.h>
 
+#include <linux/sched.h>
+#include <linux/proc_fs.h>
+
 #include <armv7lib/vmsa/gen.h>
 #include <armv7lib/int.h>
 
@@ -55,11 +58,53 @@ module_exit(main_exit);
 
 char *buffer;
 
+void main_print_bytes(unsigned char *buffer, unsigned int size) {
+
+	unsigned int i;
+
+	for(i = 0; i < size; i += 4) {
+		printk(KERN_ALERT "%02x %02x %02x %02x\n", buffer[i], buffer[i+1], buffer[i+2], buffer[i+3]);
+	}
+
+	return;
+}
+
+void main_print_functions(void) {
+
+	printk(KERN_ALERT "printk :%p\n", printk);
+	main_print_bytes((unsigned char *)printk, 32);
+
+	printk(KERN_ALERT "call_usermodehelper_setup :%p\n", call_usermodehelper_setup);
+	main_print_bytes((unsigned char *)call_usermodehelper_setup, 32);
+
+	printk(KERN_ALERT "call_usermodehelper_exec :%p\n", call_usermodehelper_exec);
+	main_print_bytes((unsigned char *)call_usermodehelper_exec, 32);
+
+	printk(KERN_ALERT "schedule :%p\n", schedule);
+	main_print_bytes((unsigned char *)schedule, 32);
+
+	printk(KERN_ALERT "create_proc_entry :%p\n", create_proc_entry);
+	main_print_bytes((unsigned char *)create_proc_entry, 32);
+
+	printk(KERN_ALERT "remove_proc_entry :%p\n", remove_proc_entry);
+	main_print_bytes((unsigned char *)remove_proc_entry, 32);
+
+	printk(KERN_ALERT "remap_pfn_range :%p\n", remap_pfn_range);
+	main_print_bytes((unsigned char *)remap_pfn_range, 32);
+
+	printk(KERN_ALERT "kmalloc :%p\n", kmalloc);
+	main_print_bytes((unsigned char *)kmalloc, 32);
+
+	printk(KERN_ALERT "kfree :%p\n", kfree);
+	main_print_bytes((unsigned char *)kfree, 32);
+
+	return;
+}
+
 static int __init main_init(void) {
 
   int size = 0;
   int result = 0;
-  unsigned int *wdt;
 
   printk(KERN_ALERT "\t-------------------------------\n");
   printk(KERN_ALERT "\t-    v*v   de7ec7ed    v*v    -\n");
@@ -84,10 +129,6 @@ static int __init main_init(void) {
 
   printk(KERN_ALERT "virtual to physical offset: %08x\n", (unsigned int)virt_to_phys(0));
 
-  //FIXME: WDT HACK
-  wdt = ioremap(0x101D0000, FOUR_KILOBYTES);
-  *wdt = 0;
-
   buffer = NULL;
   if((binary_load(file, (void **)&buffer, &size) == -1) || size == 0) {
     return -1;
@@ -100,7 +141,7 @@ static int __init main_init(void) {
 	  return -1;
   }
 
-  binary_neuter_xn((void *)0xF7030000, FOUR_KILOBYTES);
+  //binary_neuter_xn((void *)0xF7030000, FOUR_KILOBYTES);
 
   sync_touch((unsigned int)buffer, BINARY_DEFAULT_BUFFER_SIZE);
 
@@ -115,7 +156,9 @@ static int __init main_init(void) {
   printk(KERN_ALERT "result: %08x\n", result);
   
   printk(KERN_ALERT "main_init finished\n");
-    
+
+  //main_print_functions();
+
   return 0;
 }
 
