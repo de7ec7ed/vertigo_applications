@@ -23,7 +23,7 @@ ANDROID_SDKDIR := $(PWD)/../../../../android-sdk
 
 NDKDIR := $(LINKS_DIR)/android-ndk
 KDIR := $(LINKS_DIR)/android-kernel
-TOOLCHAINDIR := $(ANDROID_NDKDIR)/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86/bin
+TOOLCHAINDIR := $(ANDROID_NDKDIR)/toolchains/arm-linux-androideabi-4.4.3/prebuilt/linux-x86_64/bin
 TOOLCHAIN_PREFIX := arm-linux-androideabi-
 
 MODULEDIR := $(PWD)
@@ -48,12 +48,12 @@ all:
 	$(MAKE) -s build
 
 copy:
-	cp $(LIBRARIESDIR)/armlib/src/vmsa/tt.c src/ttC.c
-	cp $(LIBRARIESDIR)/armlib/src/vmsa/tt.S src/ttS.S
-	cp $(LIBRARIESDIR)/armlib/src/vmsa/gen.c src/genC.c
-	cp $(LIBRARIESDIR)/armlib/src/vmsa/tlb.S src/tlbS.S
-	cp $(LIBRARIESDIR)/armlib/src/vmsa/gen.S src/genS.S
-	cp $(LIBRARIESDIR)/armlib/src/int.S src/intS.S
+	cp $(LIBRARIESDIR)/armv7lib/src/vmsa/tt.c src/ttC.c
+	cp $(LIBRARIESDIR)/armv7lib/src/vmsa/tt.S src/ttS.S
+	cp $(LIBRARIESDIR)/armv7lib/src/vmsa/gen.c src/genC.c
+	cp $(LIBRARIESDIR)/armv7lib/src/vmsa/tlb.S src/tlbS.S
+	cp $(LIBRARIESDIR)/armv7lib/src/vmsa/gen.S src/genS.S
+	cp $(LIBRARIESDIR)/armv7lib/src/int.S src/intS.S
 
 build: 
 	touch inc/config.h

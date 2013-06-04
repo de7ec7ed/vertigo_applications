@@ -31,8 +31,8 @@
 #include <linux/smp.h>
 #include <linux/delay.h>
 
-#include <armlib/vmsa/gen.h>
-#include <armlib/int.h>
+#include <armv7lib/vmsa/gen.h>
+#include <armv7lib/int.h>
 
 #include "main.h"
 #include "file.h"
@@ -66,6 +66,7 @@ static int __init main_init(void) {
 
   printk(KERN_ALERT "main_init start\n");
 
+  #ifdef __SMP__
   printk(KERN_ALERT "smp_processor_id: %08x\n", smp_processor_id());
   // take down all the CPUs other than CPU 0, this should effectively reschedule us
   // on CPU 0 if we started on another core.
@@ -77,6 +78,7 @@ static int __init main_init(void) {
   // yeah yeah its a read only variable, not anymore!
   *(unsigned int *)(cpu_possible_mask) = 0x1;
   printk(KERN_ALERT "smp_processor_id: %08x\n", smp_processor_id());
+  #endif //__SMP__
 
   if(file == NULL) {
     printk(KERN_ALERT "filename not specified\n");

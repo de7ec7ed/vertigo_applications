@@ -142,14 +142,12 @@ result_t binary_neuter_xn(void *fb, size_t size) {
 	// perform the translation.
 
 	start.all = 2 * (u32_t)ONE_GIGABYTE;
-	end.all = (4 * (u32_t)ONE_GIGABYTE) - 1;
+	end.all = (4 * (u32_t)ONE_GIGABYTE - 1);
 
 	ttbr0 = tt_get_ttbr0();
 	ttbr1 = tt_get_ttbr1();
 	ttbcr = tt_get_ttbcr();
 	tt_select_ttbr(va, ttbr0, ttbr1, ttbcr, &ttbr);
-
-	//ttbr = ttbr1;
 
 	//printk(KERN_ALERT "ttbcr:%08x\n", ttbcr.all);
 	//printk(KERN_ALERT "ttbr:%08x\n", ttbr.all);
@@ -171,6 +169,7 @@ result_t binary_neuter_xn(void *fb, size_t size) {
 			tmp = TT_SECTION_SIZE;
 		}
 		else if(tt_fld_is_page_table(fld) == TRUE) {
+
 			//printk(KERN_ALERT "fld:%08x\n", fld.all);
 
 			tt_fld_to_pa(fld, &pa);
@@ -178,12 +177,13 @@ result_t binary_neuter_xn(void *fb, size_t size) {
 
 			tt_get_sld(va, l2, &sld);
 
+			//printk(KERN_ALERT "sld:%08x\n", sld.all);
+
 			if(tt_sld_is_large_page(sld) == TRUE) {
 				sld.large_page.fields.xn = FALSE;
 				tmp = TT_LARGE_PAGE_SIZE;
 			}
 			else if(tt_sld_is_small_page(sld) == TRUE) {
-				//printk(KERN_ALERT "sld:%08x\n", sld.all);
 				sld.small_page.fields.xn = FALSE;
 				tmp = TT_SMALL_PAGE_SIZE;
 			}
@@ -244,7 +244,7 @@ result_t binary_print(void *buffer, size_t size) {
 
   start.all = 2 * (u32_t)ONE_GIGABYTE;
   end.all = (4 * (u32_t)ONE_GIGABYTE) - 1;
-  pa.all = 0x16440000;
+  pa.all = 0xFF012000;
 
   gen_pa_to_va(pa, start, end, &va);
 
